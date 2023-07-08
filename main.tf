@@ -1,27 +1,29 @@
 terraform {
+  backend "s3" {
+    bucket = "my-terraform-bucket-blog"   # Replace with your S3 bucket name
+    key    = "terraform.tfstate"
+    region = "ap-south-1"          # Replace with your desired AWS region
+  }
+
   required_providers {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 3.0.1"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
     }
   }
+
+  required_version = ">= 1.2.0"
 }
 
-provider "docker" {
-  host    = "npipe:////.//pipe//docker_engine"
+provider "aws" {
+  region = "ap-south-1"   # Replace with your desired AWS region
 }
 
-resource "docker_image" "nginx" {
-  name         = "nginx"
-  keep_locally = false
-}
+resource "aws_instance" "app_server" {
+  ami           = "ami-0f5ee92e2d63afc18"   # Replace with your desired AMI ID
+  instance_type = "t2.micro"
 
-resource "docker_container" "nginx" {
-  image = docker_image.nginx.image_id
-  name  = "tutorial"
-
-  ports {
-    internal = 80
-    external = 8000
+  tags = {
+    Name = "AppServerInstance"
   }
 }
